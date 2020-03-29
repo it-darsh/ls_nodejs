@@ -1,0 +1,27 @@
+{
+  "name": "ls_nodejs_dz_02",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "dependencies": {
+    "dotenv": "^8.2.0",
+    "express": "^4.17.1"
+  },
+  "devDependencies": {
+    "eslint": "^6.8.0",
+    "standard": "^14.3.3"
+  },
+  "scripts": {
+    "test": "./node_modules/.bin/eslint app.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/it-darsh/ls_nodejs.git"
+  },
+  "author": "vc",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/it-darsh/ls_nodejs/issues"
+  },
+  "homepage": "https://github.com/it-darsh/ls_nodejs#readme"
+}

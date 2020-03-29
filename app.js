@@ -1,88 +1,41 @@
 'use strict';
-const fs = require('fs');
-const path = require('path');
-const source = process.argv[3];
-const dest = process.argv[4];
+const express = require('express');
+const app = express();
+const interval = 1000;
+const timeout = 5000;
 
-const flags = { f: false, r: false, x: false, h: false, l: false };
+function curDateTime() {
+  const now = new Date();
+  const year = now.getFullYear().toString();
+  const month = (now.getMonth().toString().length == 1) ? '0' + Number(now.getMonth() + 1) : now.getMonth() + 1;
+  const day = (now.getDate() < 10) ? ('0' + now.getDate()) : now.getDate();
+  const hours = (now.getHours() < 10) ? '0' + now.getHours() : now.getHours();
+  const minutes = (now.getMinutes() < 10) ? '0' + now.getMinutes() : now.getMinutes();
+  const seconds = (now.getSeconds() < 10) ? '0' + now.getSeconds() : now.getSeconds();
 
-const getParams = function (argv) {
-  const param = (argv[2] && argv[4] && argv[2][0] === '-') ? argv[2] : '-h';
-  for (const i in flags) {
-    for (const j in param.split('')) {
-      if (i === param[j]) {
-        flags[i] = true;
-      }
-    }
-  }
-};
-
-function app (dir, cbf, cbf1) {
-  fs.readdir(dir, (err, files) => {
-    const dirList = [];
-    const fileList = [];
-
-    for (const file of files) {
-      if (fs.statSync(path.join(dir, file)).isDirectory()) {
-        dirList.push(path.join(dir, file));
-      } else {
-        fileList.push(path.join(dir, file));
-      }
-    }
-
-    for (const file of fileList) {
-      const firstChar = path.parse(file).base[0].toLowerCase();
-      cbf(file, path.join(dest, firstChar, path.parse(file).base));
-    }
-
-    for (const cat of dirList) {
-      app(cat, cbf, cbf1);
-    }
-
-    cbf1(dir);
-  });
+  return `${year}-${month}-${day} ${hours}:${minutes}:${seconds} DMT+`;
 }
-function myLogFile (source, dest) {
-  console.log('copy', source);
-  console.log('to ', dest);
-}
-function myLogDir (dir) {
-  console.log('   [dir]', dir);
-}
-function myCopyFile (source, dest) {
-  fs.mkdir(path.parse(dest).dir, () => {
-    fs.createReadStream(source)
-      .pipe(fs.createWriteStream(dest));
-  });
-}
-function myBlank () {
+function curDateTimeUTC() {
+  const now = new Date();
+  const year = now.getUTCFullYear().toString();
+  const month = (now.getUTCMonth().toString().length == 1) ? '0' + Number(now.getUTCMonth() + 1) : now.getUTCMonth() + 1;
+  const day = (now.getUTCDate() < 10) ? ('0' + now.getUTCDate()) : now.getUTCDate();
+  const hours = (now.getUTCHours() < 10) ? '0' + now.getUTCHours() : now.getUTCHours();
+  const minutes = (now.getUTCMinutes() < 10) ? '0' + now.getUTCMinutes() : now.getUTCMinutes();
+  const seconds = (now.getUTCSeconds() < 10) ? '0' + now.getUTCSeconds() : now.getUTCSeconds();
+
+  return `${year}-${month}-${day} ${hours}:${minutes}:${seconds} UTC`;
 }
 
-getParams(process.argv);
+app.get('/', function (req, res) {
+  const intervalId = setInterval(() => {
+    console.log(curDateTimeUTC())
+  }, interval);
 
-if (flags.h) {
-  console.log('необходимо задать параметры запуска');
-  console.log(' -  - обязательный параметр');
-  console.log(' -l  - режим логирования в консоль');
-  console.log(' -f  - предварительно удалить папку назначения, если существует(not work)');
-  console.log(' -r  - переименовать файл при совпадении имен(not work)');
-  console.log(' -c  - удалить папку источник(not work)');
-  console.log('Пример: app -<key> <source> <dest>');
-  process.exit();
-}
-if (flags.f) {
-  // удачить папку назначения
-}
-if (!fs.existsSync(dest)) {
-  fs.mkdirSync(dest);
-}
+  setTimeout(() => {
+    clearInterval(intervalId);
+    res.send(curDateTimeUTC());
+  }, timeout)
+})
 
-if (flags.l) {
-  app(path.join(source), myLogFile, myLogDir); // информация
-} else {
-  app(path.join(source), myCopyFile, myBlank);// копирование
-}
-
-if (flags.c) {
-  // удалить папку источник
-}
+app.listen(3000)
